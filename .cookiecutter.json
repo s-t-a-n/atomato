@@ -1,0 +1,14 @@
+{
+  "_output_dir": "/home/stan/projects/amotanics",
+  "_template": "gh:cjolowicz/cookiecutter-hypermodern-python",
+  "author": "s-t-a-n",
+  "copyright_year": "2023",
+  "development_status": "Development Status :: 1 - Planning",
+  "email": "stan.krakakai@gmail.com",
+  "friendly_name": "Amotanics",
+  "github_user": "s-t-a-n",
+  "license": "MIT",
+  "package_name": "amotanics",
+  "project_name": "Amotanics",
+  "version": "0.0.0"
+}
