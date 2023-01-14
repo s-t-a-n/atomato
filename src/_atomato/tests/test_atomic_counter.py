@@ -46,6 +46,10 @@ def test_atomic_counter_basics():
     assert ctr > 0
     assert ctr < 2
 
+    assert AtomicCounter(1) == AtomicCounter(1)
+    assert AtomicCounter(1) < AtomicCounter(2)
+    assert AtomicCounter(2) > AtomicCounter(1)
+
     assert (ctr == object()) is False
 
     # test negative argument to `.inc()`

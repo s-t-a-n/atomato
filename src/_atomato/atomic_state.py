@@ -1,4 +1,5 @@
 from functools import total_ordering
+from typing import Optional
 from typing import SupportsInt
 from typing import Type
 from typing import Union
@@ -6,7 +7,7 @@ from typing import Union
 from .atomic_integer import AtomicInteger
 
 
-StateType = Union[int]
+StateType = Union[int, SupportsInt]
 
 
 @total_ordering
@@ -16,27 +17,38 @@ class AtomicState:
     _state: AtomicInteger
     _StateType: Type[StateType]
 
-    def __init__(self, default_state: StateType, state_type: Type[StateType]):
+    def __init__(
+        self, default_state: StateType, state_type: Optional[Type[StateType]] = None
+    ):
         """Construct an `AtomicState`.
 
         Args:
             default_state: Default state that the AtomicState will be set to.
-            state_type: Type that the AtomicState will wrap.
-                        This type should be a type that supports integer conversion.
+            state_type: Integer convertible type that the AtomicState will wrap.
+                        if left default (None), it will take the type of `default_state`
         """
         self._state = AtomicInteger(int(default_state))
-        self._StateType = state_type
+        self._StateType = state_type if state_type else type(default_state)
 
-    def set(self, state: SupportsInt) -> StateType:
+    def set(self, state: StateType) -> StateType:
         """Set AtomicState to `state`.
 
         Args:
             state: State that the AtomicState will be set to (should support conversion to `int`)
 
         Returns:
-            StateType: Return new state.
+            StateType: Return state after setting.
         """
         self._state.set(int(state))
+        return self.state
+
+    def reset(self) -> StateType:
+        """Reset value of AtomicState to `default_state`.
+
+        Returns:
+            StateType: Return state after resetting.
+        """
+        self._state.reset()
         return self.state
 
     @property
@@ -46,7 +58,7 @@ class AtomicState:
         Returns:
             StateType: Return state.
         """
-        return self._StateType(self._state.value)
+        return self._StateType(self._state.value)  # type: ignore
 
     @property
     def tracker(self) -> "AtomicStateTracker":
@@ -62,14 +74,14 @@ class AtomicState:
             return NotImplemented
         return self._state == int(other)
 
-    def __lt__(self, other: SupportsInt) -> bool:
+    def __lt__(self, other: StateType) -> bool:
         return int(self._state) < int(other)
 
     def __int__(self) -> int:
         return int(self._state)
 
     def __str__(self) -> str:
-        return str(self._StateType(self.state))
+        return str(self.state)
 
     def __repr__(self) -> str:
         return f"AtomicState({str(self)})"

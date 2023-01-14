@@ -5,6 +5,7 @@ from time import time
 from typing import Callable
 from typing import Optional
 from typing import SupportsInt
+from typing import Union
 
 
 @total_ordering
@@ -19,7 +20,9 @@ class AtomicCounter:
     _signal: Condition
 
     def __init__(
-        self, default_value: int | SupportsInt = 0, allow_below_default: bool = True
+        self,
+        default_value: Union[int, SupportsInt] = 0,
+        allow_below_default: bool = True,
     ):
         """Construct an `AtomicCounter`.
 
@@ -36,7 +39,7 @@ class AtomicCounter:
         self._signal = Condition(self._lock)
 
     def _wait(
-        self, predicate: str, d: int | SupportsInt, timeout: Optional[float]
+        self, predicate: str, d: Union[int, SupportsInt], timeout: Optional[float]
     ) -> bool:
         predicates = {
             "==": lambda x, y: x == y,
@@ -61,7 +64,7 @@ class AtomicCounter:
                 self._signal.wait(timeout)
         return False
 
-    def _set(self, d: int | SupportsInt = 1) -> int:
+    def _set(self, d: Union[int, SupportsInt] = 1) -> int:
         with self._lock:
             self._value = (
                 int(d)
@@ -71,7 +74,7 @@ class AtomicCounter:
             self._signal.notify_all()
             return self._value
 
-    def inc(self, d: int | SupportsInt = 1) -> int:
+    def inc(self, d: Union[int, SupportsInt] = 1) -> int:
         """Increase value of AtomicCounter by `d`.
 
         Args:
@@ -82,7 +85,7 @@ class AtomicCounter:
         """
         return self._set(self.value + int(d))
 
-    def dec(self, d: int = 1) -> int:
+    def dec(self, d: Union[int, SupportsInt] = 1) -> int:
         """Decrease value of AtomicCounter by `d`.
 
         Args:
@@ -111,7 +114,9 @@ class AtomicCounter:
         with self._lock:
             return self._value
 
-    def wait_equal(self, d: int | SupportsInt, timeout: Optional[float] = None) -> bool:
+    def wait_equal(
+        self, d: Union[int, SupportsInt], timeout: Optional[float] = None
+    ) -> bool:
         """Wait until AtomicCounter has a value of `d` or if `timeout` expired.
 
         Args:
@@ -124,7 +129,9 @@ class AtomicCounter:
         """
         return self._wait(d=d, predicate="==", timeout=timeout)
 
-    def wait_below(self, d: int | SupportsInt, timeout: Optional[float] = None) -> bool:
+    def wait_below(
+        self, d: Union[int, SupportsInt], timeout: Optional[float] = None
+    ) -> bool:
         """Wait until AtomicCounter has a value lower than `d` or if `timeout` expired.
 
         Args:
@@ -137,7 +144,9 @@ class AtomicCounter:
         """
         return self._wait(d=d, predicate="<", timeout=timeout)
 
-    def wait_above(self, d: int | SupportsInt, timeout: Optional[float] = None) -> bool:
+    def wait_above(
+        self, d: Union[int, SupportsInt], timeout: Optional[float] = None
+    ) -> bool:
         """Wait until AtomicCounter has a value higher than `d` or if `timeout` expired.
 
         Args:
@@ -155,7 +164,7 @@ class AtomicCounter:
             return NotImplemented
         return self.value == int(other)
 
-    def __lt__(self, other: int | SupportsInt) -> bool:
+    def __lt__(self, other: Union[int, SupportsInt]) -> bool:
         return int(self.value) < int(other)
 
     def __int__(self) -> int:

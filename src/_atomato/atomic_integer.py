@@ -1,4 +1,5 @@
 from typing import SupportsInt
+from typing import Union
 
 from .atomic_counter import AtomicCounter
 
@@ -6,7 +7,7 @@ from .atomic_counter import AtomicCounter
 class AtomicInteger(AtomicCounter):
     """AtomicState allows to store an integer in a threadsafe way."""
 
-    def __init__(self, default_value: int | SupportsInt = 0):
+    def __init__(self, default_value: Union[int, SupportsInt] = 0):
         """Construct an `AtomicInteger`.
 
         Args:
@@ -14,7 +15,7 @@ class AtomicInteger(AtomicCounter):
         """
         super().__init__(default_value, allow_below_default=True)
 
-    def set(self, d: int | SupportsInt = 0) -> int:
+    def set(self, d: Union[int, SupportsInt] = 0) -> int:
         """Set AtomicInteger to `d`.
 
         Args:
