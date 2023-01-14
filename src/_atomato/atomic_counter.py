@@ -35,9 +35,6 @@ class AtomicCounter:
         self._lock = RLock()
         self._signal = Condition(self._lock)
 
-    def _trigger(self) -> None:
-        self._signal.notify_all()
-
     def _wait(
         self, predicate: str, d: int | SupportsInt, timeout: Optional[float]
     ) -> bool:
@@ -71,7 +68,7 @@ class AtomicCounter:
                 if self._allow_below_default or int(d) >= self._default_value
                 else self.reset()
             )
-            self._trigger()
+            self._signal.notify_all()
             return self._value
 
     def inc(self, d: int | SupportsInt = 1) -> int:
