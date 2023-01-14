@@ -20,3 +20,7 @@ def test_atomic_integer_basics():
     assert i == 0
     i.set(2)
     assert i == 2
+
+    i = AtomicInteger(0)
+    assert str(i) == "0"
+    assert repr(i) == "AtomicInteger(0)"

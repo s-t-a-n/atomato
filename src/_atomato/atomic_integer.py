@@ -12,7 +12,7 @@ class AtomicInteger(AtomicCounter):
         Args:
             default_value: Default value that the AtomicInteger will be set to.
         """
-        super().__init__(default_value)
+        super().__init__(default_value, allow_below_default=True)
 
     def set(self, d: int | SupportsInt = 0) -> int:
         """Set AtomicInteger to `d`.
@@ -23,6 +23,10 @@ class AtomicInteger(AtomicCounter):
         Returns:
             int: Return new value.
         """
-        with self._lock:
-            self._value = int(d)
-            return self._value
+        return self._set(d=d)
+
+    def __str__(self) -> str:
+        return f"{self.value}"
+
+    def __repr__(self) -> str:
+        return f"AtomicInteger({str(self)})"

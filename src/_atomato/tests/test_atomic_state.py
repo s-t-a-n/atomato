@@ -17,6 +17,7 @@ def test_atomic_state_basics():
     assert s.state == State.A
 
     assert str(s) == "State.A"
+    assert repr(s) == "AtomicState(State.A)"
 
     assert int(s) == int(State.A)
 
@@ -43,6 +44,7 @@ def test_atomic_state_tracker():
     assert t.state == State.A
     assert not hasattr(t, "set")
     assert str(t) == "State.A"
+    assert repr(t) == "AtomicStateTracker(State.A)"
 
     s.set(State.B)
     assert t.state == State.B

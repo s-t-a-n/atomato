@@ -49,16 +49,13 @@ class AtomicState:
         return self._StateType(self._state.value)
 
     @property
-    def tracker(self) -> "StateTracker":
+    def tracker(self) -> "AtomicStateTracker":
         """Return `StateTracker` which only allows tracking the state.
 
         Returns:
-            StateTracker: Return `StateTracker`.
+            AtomicStateTracker: Return `StateTracker`.
         """
-        return StateTracker(self)
-
-    def __str__(self) -> str:
-        return str(self._StateType(self.state))
+        return AtomicStateTracker(self)
 
     def __eq__(self, other: object) -> bool:
         if not hasattr(other, "__int__"):
@@ -71,23 +68,29 @@ class AtomicState:
     def __int__(self) -> int:
         return int(self._state)
 
+    def __str__(self) -> str:
+        return str(self._StateType(self.state))
 
-class StateTracker:
+    def __repr__(self) -> str:
+        return f"AtomicState({str(self)})"
+
+
+class AtomicStateTracker:
     """Encapsulation class for AtomicState that allows only tracking the state (disallowing setting it)."""
 
     _state: AtomicState
 
     def __init__(self, atomic_state: AtomicState):
-        """Construct a `StateTracker`.
+        """Construct an `AtomicStateTracker`.
 
         Args:
-            atomic_state: `AtomicState` that the StateTracker will track.
+            atomic_state: `AtomicState` that the AtomicStateTracker will track.
         """
         self._state = atomic_state
 
     @property
     def state(self) -> StateType:
-        """Return state of StateTracker.
+        """Return state of AtomicStateTracker.
 
         Returns:
             StateType: Return state.
@@ -96,3 +99,6 @@ class StateTracker:
 
     def __str__(self) -> str:
         return str(self.state)
+
+    def __repr__(self) -> str:
+        return f"AtomicStateTracker({str(self)})"

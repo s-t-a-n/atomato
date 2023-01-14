@@ -48,6 +48,14 @@ def test_atomic_counter_basics():
 
     assert (ctr == object()) is False
 
+    # test negative argument to `.inc()`
+    ctr = AtomicCounter(0)
+    assert ctr.inc(-1) == -1
+
+    i = AtomicCounter(0)
+    assert str(i) == "0"
+    assert repr(i) == "AtomicCounter(0)"
+
 
 def test_atomic_counter_wait_timeout():
     ctr = AtomicCounter()
@@ -66,11 +74,12 @@ def test_atomic_counter_wait_timeout():
 def test_atomic_counter_below_zero(allow_below_default: bool, default_value: int):
     # test `allow_below_zero` arg defaults to True
     ctr = AtomicCounter(default_value)
+    assert ctr.dec() == default_value - 1
+
+    ctr.reset()
 
     ctr.inc()
     assert ctr.reset() == default_value
-
-    assert ctr.dec() == default_value - 1
 
     # test `allow_below_zero` arg when False
     ctr = AtomicCounter(default_value, allow_below_default=allow_below_default)

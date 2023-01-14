@@ -1,7 +1,8 @@
 from functools import total_ordering
-from threading import Event
+from threading import Condition
 from threading import RLock
 from time import time
+from typing import Callable
 from typing import Optional
 from typing import SupportsInt
 
@@ -15,7 +16,7 @@ class AtomicCounter:
     _allow_below_default: bool
 
     _lock: RLock
-    _event: Event
+    _signal: Condition
 
     def __init__(
         self, default_value: int | SupportsInt = 0, allow_below_default: bool = True
@@ -32,30 +33,46 @@ class AtomicCounter:
         self._allow_below_default = allow_below_default
 
         self._lock = RLock()
-        self._event = Event()
+        self._signal = Condition(self._lock)
 
-    def _signal(self) -> None:
-        self._event.set()
-        self._event.clear()
+    def _trigger(self) -> None:
+        self._signal.notify_all()
 
     def _wait(
         self, predicate: str, d: int | SupportsInt, timeout: Optional[float]
     ) -> bool:
+        predicates = {
+            "==": lambda x, y: x == y,
+            ">": lambda x, y: x > y,
+            "<": lambda x, y: x < y,
+            ">=": lambda x, y: x >= y,
+            "<=": lambda x, y: x <= y,
+        }
+        assert (
+            predicate in predicates.keys()
+        ), f"predicate {predicate} not found in {predicates.keys()}"
+        mapped_predicate: Callable[[SupportsInt, SupportsInt], bool] = predicates[
+            predicate
+        ]
+
         start = time()
         while timeout is None or timeout > 0:
-            if any(
-                [
-                    predicate == "=" and self.value == int(d),
-                    predicate == ">" and self.value > int(d),
-                    predicate == "<" and self.value < int(d),
-                    predicate == ">=" and self.value >= int(d),
-                    predicate == "<=" and self.value <= int(d),
-                ]
-            ):
+            if mapped_predicate(self.value, int(d)):
                 return True
             timeout = timeout - (time() - start) if timeout else None
-            self._event.wait(timeout)
+            with self._lock:
+                self._signal.wait(timeout)
         return False
+
+    def _set(self, d: int | SupportsInt = 1) -> int:
+        with self._lock:
+            self._value = (
+                int(d)
+                if self._allow_below_default or int(d) >= self._default_value
+                else self.reset()
+            )
+            self._trigger()
+            return self._value
 
     def inc(self, d: int | SupportsInt = 1) -> int:
         """Increase value of AtomicCounter by `d`.
@@ -66,10 +83,7 @@ class AtomicCounter:
         Returns:
             int: value after increasing by `d`
         """
-        with self._lock:
-            self._value += int(d)
-            self._signal()
-            return self._value
+        return self._set(self.value + int(d))
 
     def dec(self, d: int = 1) -> int:
         """Decrease value of AtomicCounter by `d`.
@@ -80,11 +94,7 @@ class AtomicCounter:
         Returns:
             int: value after decreasing by `d`
         """
-        return (
-            self.inc(-d)
-            if self._allow_below_default or self.value - d >= self._default_value
-            else self.reset()
-        )
+        return self._set(self.value - int(d))
 
     def reset(self) -> int:
         """Reset value of AtomicCounter to `default_value` (0 if not specified to constructor).
@@ -92,9 +102,7 @@ class AtomicCounter:
         Returns:
             int: value after resetting to `default value`
         """
-        with self._lock:
-            self._value = self._default_value
-            return self._value
+        return self._set(self._default_value)
 
     @property
     def value(self) -> int:
@@ -117,7 +125,7 @@ class AtomicCounter:
         Returns:
             bool: Return True if AtomicCounter's value is equal to `d`, False if the timeout expired.
         """
-        return self._wait(d=d, predicate="=", timeout=timeout)
+        return self._wait(d=d, predicate="==", timeout=timeout)
 
     def wait_below(self, d: int | SupportsInt, timeout: Optional[float] = None) -> bool:
         """Wait until AtomicCounter has a value lower than `d` or if `timeout` expired.
@@ -161,3 +169,9 @@ class AtomicCounter:
 
     def __exit__(self, etype, value, traceback) -> None:  # type: ignore
         self._lock.release()
+
+    def __str__(self) -> str:
+        return f"{self.value}"
+
+    def __repr__(self) -> str:
+        return f"AtomicCounter({str(self)})"
