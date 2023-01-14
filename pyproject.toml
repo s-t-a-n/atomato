@@ -60,7 +60,7 @@ tests = ["tests", "*/tests"]
 [tool.coverage.run]
 branch = true
 source = ["atomatics", "_atomatics"]
-omit = ["__init__.py", "__init__"]
+omit = ["__init__.py", "__init__", "*/__init__.py"]
 
 [tool.coverage.report]
 show_missing = true
