@@ -96,8 +96,6 @@ def test_atomic_counter_below_zero(allow_below_default: bool, default_value: int
 def test_atomic_counter_lock():
     ctr = AtomicCounter()
 
-    thread_sleep_time = 0.0001
-
     def concurrent(c: AtomicCounter):
         while c.value < 1:
             if not c._lock.acquire(blocking=False):
@@ -108,7 +106,7 @@ def test_atomic_counter_lock():
     def concurrent_with_context(c: AtomicCounter):
         while c.value < 1:
             with c:
-                sleep(thread_sleep_time)
+                sleep(0.0001)
 
     t1 = Thread(target=concurrent, args=[ctr])
     t1.start()
@@ -116,5 +114,4 @@ def test_atomic_counter_lock():
     t2.start()
 
     ctr.wait_above(0)
-    ctr.wait_above(0, timeout=thread_sleep_time * 2)
     assert ctr > 0
