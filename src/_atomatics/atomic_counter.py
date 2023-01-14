@@ -38,14 +38,18 @@ class AtomicCounter:
         self._event.set()
         self._event.clear()
 
-    def _wait(self, op: str, d: int | SupportsInt, timeout: Optional[float]) -> bool:
+    def _wait(
+        self, predicate: str, d: int | SupportsInt, timeout: Optional[float]
+    ) -> bool:
         start = time()
         while timeout is None or timeout > 0:
             if any(
                 [
-                    op == "=" and self.value == int(d),
-                    op == ">" and self.value > int(d),
-                    op == "<" and self.value < int(d),
+                    predicate == "=" and self.value == int(d),
+                    predicate == ">" and self.value > int(d),
+                    predicate == "<" and self.value < int(d),
+                    predicate == ">=" and self.value >= int(d),
+                    predicate == "<=" and self.value <= int(d),
                 ]
             ):
                 return True
@@ -113,7 +117,7 @@ class AtomicCounter:
         Returns:
             bool: Return True if AtomicCounter's value is equal to `d`, False if the timeout expired.
         """
-        return self._wait(d=d, op="=", timeout=timeout)
+        return self._wait(d=d, predicate="=", timeout=timeout)
 
     def wait_below(self, d: int | SupportsInt, timeout: Optional[float] = None) -> bool:
         """Wait until AtomicCounter has a value lower than `d` or if `timeout` expired.
@@ -126,7 +130,7 @@ class AtomicCounter:
         Returns:
             bool: Return True if AtomicCounter's value is below `d`, False if the timeout expired.
         """
-        return self._wait(d=d, op="<", timeout=timeout)
+        return self._wait(d=d, predicate="<", timeout=timeout)
 
     def wait_above(self, d: int | SupportsInt, timeout: Optional[float] = None) -> bool:
         """Wait until AtomicCounter has a value higher than `d` or if `timeout` expired.
@@ -139,7 +143,7 @@ class AtomicCounter:
         Returns:
             bool: Return True if AtomicCounter's value is above `d`, False if the timeout expired.
         """
-        return self._wait(d=d, op=">", timeout=timeout)
+        return self._wait(d=d, predicate=">", timeout=timeout)
 
     def __eq__(self, other: object) -> bool:
         if not hasattr(other, "__int__"):
