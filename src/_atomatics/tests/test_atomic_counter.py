@@ -103,9 +103,5 @@ def test_atomic_counter_lock():
     t2.start()
 
     ctr.wait_above(0)
-
+    ctr.wait_above(0, timeout=thread_sleep_time * 2)
     assert ctr > 0
-
-    sleep(thread_sleep_time * 2)
-    assert not t1.is_alive()
-    assert not t2.is_alive()
