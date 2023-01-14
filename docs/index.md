@@ -19,5 +19,5 @@ reference
 contributing
 Code of Conduct <codeofconduct>
 License <license>
-Changelog <https://github.com/s-t-a-n/Atomatics/releases>
+Changelog <https://github.com/s-t-a-n/Atomato/releases>
 ```

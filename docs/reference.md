@@ -1,8 +1,8 @@
 # Reference
 
-## atomatics
+## atomato
 
 ```{eval-rst}
-.. automodule:: atomatics
+.. automodule:: atomato
    :members:
 ```

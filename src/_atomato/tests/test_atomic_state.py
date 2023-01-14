@@ -4,7 +4,7 @@ from enum import Enum
 
 import pytest
 
-from atomatics import AtomicState
+from atomato import AtomicState
 
 
 def test_atomic_state_basics():

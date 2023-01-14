@@ -1,23 +1,23 @@
 [tool.poetry]
-name = "Atomatics"
+name = "Atomato"
 version = "0.0.0"
-description = "Atomatics"
+description = "Atomato"
 authors = ["s-t-a-n <stan.krakakai@gmail.com>"]
 license = "MIT"
 readme = "README.md"
-homepage = "https://github.com/s-t-a-n/Atomatics"
-repository = "https://github.com/s-t-a-n/Atomatics"
-documentation = "https://Atomatics.readthedocs.io"
+homepage = "https://github.com/s-t-a-n/Atomato"
+repository = "https://github.com/s-t-a-n/Atomato"
+documentation = "https://Atomato.readthedocs.io"
 packages = [
-    { include = "atomatics", from = "src" },
-    { include = "_atomatics", from = "src" },
+    { include = "atomato", from = "src" },
+    { include = "_atomato", from = "src" },
 ]
 classifiers = [
     "Development Status :: 1 - Planning",
 ]
 
 [tool.poetry.urls]
-Changelog = "https://github.com/s-t-a-n/Atomatics/releases"
+Changelog = "https://github.com/s-t-a-n/Atomato/releases"
 
 [tool.poetry.dependencies]
 python = "^3.10"
@@ -51,7 +51,7 @@ xdoctest = {extras = ["colors"], version = ">=0.15.10"}
 #myst-parser = {version = ">=0.16.1"}
 
 #[tool.poetry.scripts]
-#Atomatics = "atomatics.__main__:main"
+#Atomato = "atomato.__main__:main"
 
 [tool.coverage.paths]
 source = ["src", "*/site-packages"]
@@ -59,7 +59,7 @@ tests = ["tests", "*/tests"]
 
 [tool.coverage.run]
 branch = true
-source = ["atomatics", "_atomatics"]
+source = ["atomato", "_atomato"]
 omit = ["__init__.py", "__init__", "*/__init__.py"]
 
 [tool.coverage.report]

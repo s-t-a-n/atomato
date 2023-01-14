@@ -5,7 +5,7 @@ from time import sleep
 
 import pytest
 
-from atomatics import AtomicCounter
+from atomato import AtomicCounter
 
 
 def test_atomic_counter_basics():

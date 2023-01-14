@@ -12,9 +12,9 @@ Here is a list of important resources for contributors:
 - [Code of Conduct]
 
 [mit license]: https://opensource.org/licenses/MIT
-[source code]: https://github.com/s-t-a-n/Atomatics
-[documentation]: https://Atomatics.readthedocs.io/
-[issue tracker]: https://github.com/s-t-a-n/Atomatics/issues
+[source code]: https://github.com/s-t-a-n/Atomato
+[documentation]: https://Atomato.readthedocs.io/
+[issue tracker]: https://github.com/s-t-a-n/Atomato/issues
 
 ## How to report a bug
 
@@ -54,7 +54,7 @@ or the command-line interface:
 
 ```console
 $ poetry run python
-$ poetry run Atomatics
+$ poetry run Atomato
 ```
 
 [poetry]: https://python-poetry.org/
@@ -108,7 +108,7 @@ $ nox --session=pre-commit -- install
 It is recommended to open an issue before starting work on anything.
 This will allow a chance to talk it over with the owners and validate your approach.
 
-[pull request]: https://github.com/s-t-a-n/Atomatics/pulls
+[pull request]: https://github.com/s-t-a-n/Atomato/pulls
 
 <!-- github-only -->
 

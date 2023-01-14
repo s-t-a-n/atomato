@@ -1,23 +1,23 @@
-# Atomatics
+# Atomato
 
-[![PyPI](https://img.shields.io/pypi/v/Atomatics.svg)][pypi_]
-[![Status](https://img.shields.io/pypi/status/Atomatics.svg)][status]
-[![Python Version](https://img.shields.io/pypi/pyversions/Atomatics)][python version]
-[![License](https://img.shields.io/pypi/l/Atomatics)][license]
+[![PyPI](https://img.shields.io/pypi/v/Atomato.svg)][pypi_]
+[![Status](https://img.shields.io/pypi/status/Atomato.svg)][status]
+[![Python Version](https://img.shields.io/pypi/pyversions/Atomato)][python version]
+[![License](https://img.shields.io/pypi/l/Atomato)][license]
 
-[![Read the documentation at https://Atomatics.readthedocs.io/](https://img.shields.io/readthedocs/Atomatics/latest.svg?label=Read%20the%20Docs)][read the docs]
-[![Tests](https://github.com/s-t-a-n/Atomatics/workflows/Tests/badge.svg)][tests]
-[![Codecov](https://codecov.io/gh/s-t-a-n/Atomatics/branch/main/graph/badge.svg)][codecov]
+[![Read the documentation at https://Atomato.readthedocs.io/](https://img.shields.io/readthedocs/Atomato/latest.svg?label=Read%20the%20Docs)][read the docs]
+[![Tests](https://github.com/s-t-a-n/Atomato/workflows/Tests/badge.svg)][tests]
+[![Codecov](https://codecov.io/gh/s-t-a-n/Atomato/branch/main/graph/badge.svg)][codecov]
 
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)][pre-commit]
 [![Black](https://img.shields.io/badge/code%20style-black-000000.svg)][black]
 
-[pypi_]: https://pypi.org/project/Atomatics/
-[status]: https://pypi.org/project/Atomatics/
-[python version]: https://pypi.org/project/Atomatics
-[read the docs]: https://Atomatics.readthedocs.io/
-[tests]: https://github.com/s-t-a-n/Atomatics/actions?workflow=Tests
-[codecov]: https://app.codecov.io/gh/s-t-a-n/Atomatics
+[pypi_]: https://pypi.org/project/Atomato/
+[status]: https://pypi.org/project/Atomato/
+[python version]: https://pypi.org/project/Atomato
+[read the docs]: https://Atomato.readthedocs.io/
+[tests]: https://github.com/s-t-a-n/Atomato/actions?workflow=Tests
+[codecov]: https://app.codecov.io/gh/s-t-a-n/Atomato
 [pre-commit]: https://github.com/pre-commit/pre-commit
 [black]: https://github.com/psf/black
 
@@ -31,10 +31,10 @@
 
 ## Installation
 
-You can install _Atomatics_ via [pip] from [PyPI]:
+You can install _Atomato_ via [pip] from [PyPI]:
 
 ```console
-$ pip install Atomatics
+$ pip install Atomato
 ```
 
 ## Usage
@@ -49,7 +49,7 @@ To learn more, see the [Contributor Guide].
 ## License
 
 Distributed under the terms of the [MIT license][license],
-_Atomatics_ is free and open source software.
+_Atomato_ is free and open source software.
 
 ## Issues
 
@@ -63,11 +63,11 @@ This project was generated from [@cjolowicz]'s [Hypermodern Python Cookiecutter]
 [@cjolowicz]: https://github.com/cjolowicz
 [pypi]: https://pypi.org/
 [hypermodern python cookiecutter]: https://github.com/cjolowicz/cookiecutter-hypermodern-python
-[file an issue]: https://github.com/s-t-a-n/Atomatics/issues
+[file an issue]: https://github.com/s-t-a-n/Atomato/issues
 [pip]: https://pip.pypa.io/
 
 <!-- github-only -->
 
-[license]: https://github.com/s-t-a-n/Atomatics/blob/main/LICENSE
-[contributor guide]: https://github.com/s-t-a-n/Atomatics/blob/main/CONTRIBUTING.md
-[command-line reference]: https://Atomatics.readthedocs.io/en/latest/usage.html
+[license]: https://github.com/s-t-a-n/Atomato/blob/main/LICENSE
+[contributor guide]: https://github.com/s-t-a-n/Atomato/blob/main/CONTRIBUTING.md
+[command-line reference]: https://Atomato.readthedocs.io/en/latest/usage.html

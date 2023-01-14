@@ -1,6 +1,6 @@
 # type: ignore
 
-from atomatics import AtomicInteger
+from atomato import AtomicInteger
 
 
 def test_atomic_integer_basics():

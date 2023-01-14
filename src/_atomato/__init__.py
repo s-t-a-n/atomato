@@ -1,4 +1,4 @@
-"""Internal Atomatics package."""
+"""Internal Atomato package."""
 
 from .atomic_counter import AtomicCounter
 from .atomic_integer import AtomicInteger

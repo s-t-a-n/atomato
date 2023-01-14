@@ -1,5 +1,5 @@
 """Sphinx configuration."""
-project = "Atomatics"
+project = "Atomato"
 author = "s-t-a-n"
 copyright = "2023, s-t-a-n"
 extensions = [
