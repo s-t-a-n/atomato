@@ -1,11 +1,11 @@
 # type: ignore
 import pytest
 
-from atomato import AtomicVariable
+from atomato import AtomicObject
 
 
 def test_atomic_variables_basics():
-    a = AtomicVariable(int())
+    a = AtomicObject(int())
     assert a.value == 0
     assert a == 0
 
@@ -18,20 +18,27 @@ def test_atomic_variables_basics():
         a.set(value=2)
         assert a == 2
 
-    assert AtomicVariable(float(1.1)) == 1.1
+    assert AtomicObject(float(1.1)) == 1.1
+
+    from atomato import AtomicCounter
+
+    assert AtomicObject(AtomicCounter(1)).set_by(setter=lambda ac: ac.inc()) == 2
 
     class MyClass:
         pass
 
     with pytest.raises(TypeError) as excinfo:
-        int(AtomicVariable(MyClass()))
+        int(AtomicObject(MyClass()))
     assert (
         "int() argument must be a string, a bytes-like object or a real number, not 'MyClass'"
         in str(excinfo.value)
     )
 
-    assert str(AtomicVariable(int())) == "0"
-    assert repr(AtomicVariable(int())) == "AtomicVariable(0)"
+    # test construction methods
+    assert AtomicObject(int(1)) == AtomicObject(int, 1)
+
+    assert str(AtomicObject(int())) == "0"
+    assert repr(AtomicObject(int())) == "AtomicObject(0)"
 
 
 def test_atomic_variables_concurrency():
@@ -39,12 +46,10 @@ def test_atomic_variables_concurrency():
     from threading import Thread
     from time import time
 
-    from atomato import AtomicCounter
-
     upper_limit = 100
 
     def consumer(
-        a: AtomicVariable[AtomicCounter],
+        a: AtomicObject[int],
         consumer_start: Event,
         consumer_finished: Event,
     ):
@@ -53,12 +58,11 @@ def test_atomic_variables_concurrency():
         assert a >= upper_limit
         consumer_finished.set()
 
-    def producer(a: AtomicVariable[AtomicCounter]):
+    def producer(a: AtomicObject[int]):
         for i in range(upper_limit):
-            a.set_by(setter=lambda c: c.inc(1))
+            a.set(a.value + 1)
 
-    ctr = AtomicCounter()
-    a = AtomicVariable(ctr)
+    a = AtomicObject(int())
     thread_count = 2
     consumer_start_event = Event()
     consumer_finished_events = []
@@ -83,5 +87,3 @@ def test_atomic_variables_concurrency():
 
     iteration_time = time() - iteration_time_start
     assert iteration_time < 0.001
-
-    assert ctr == upper_limit
