@@ -5,8 +5,8 @@ from typing import Any
 from typing import Callable
 from typing import Dict
 from typing import Generic
-from typing import List
 from typing import Optional
+from typing import Tuple
 from typing import Type
 from typing import TypeVar
 from typing import Union
@@ -23,15 +23,24 @@ class AtomicObject(Generic[T]):
     _object: T
 
     def __init__(
-        self, obj: Union[T, Type[T]], *args: List[Any], **kwargs: Dict[str, Any]
+        self, obj: Union[T, Type[T]], *args: Tuple[Any, ...], **kwargs: Dict[str, Any]
     ):
         """Construct an `AtomicObject` for `instance` by inline creating .
 
-        Example:
-            AtomicObject(MyClass(foo="a bit bar, but not too much"))
+        Example::
+
+            AtomicObject(MyClass(foo="a bit bar, but not too much")) # the instance passed will be adopted
+                or
+            AtomicObject(MyClass, foo="a bit bar, but not too much") # instance will be delayed constructed
+
+            Pass by instance or by class type. Both offer advantages so both are supported.
 
         Args:
-            obj: instance that will be encapsulated in `AtomicObject`.
+            obj: An instance or class that will be encapsulated in `AtomicObject`.
+            args: If passing a class type to `obj` then these will be the args
+                  for delayed construction.
+            kwargs: If passing a class type to `obj` then these will be the keyword args
+                    for delayed construction.
         """
         self._condition = Condition()
         self._object = obj(*args, **kwargs) if isclass(obj) else obj
@@ -58,7 +67,8 @@ class AtomicObject(Generic[T]):
         Returns:
             bool: True if predicate is true. False if `timeout` has expired.
 
-        Example:
+        Example::
+
             class MyClass:
                 _v: int = 0
 
@@ -87,7 +97,8 @@ class AtomicObject(Generic[T]):
         Returns:
             T: Value of AtomicObject after setting it.
 
-        Example:
+        Example::
+
             class MyClass:
                 _v: object
                 def set(self, v):
@@ -106,7 +117,7 @@ class AtomicObject(Generic[T]):
         """Set value of AtomicObject.
 
         Args:
-            value: Value that the AtomicInteger will be set to.
+            value: Value that the AtomicObject will be set to.
 
         Returns:
             T: Value of AtomicObject after setting it.
