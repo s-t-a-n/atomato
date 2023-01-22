@@ -17,26 +17,36 @@ def test_atomic_counter_basics():
     ctr.dec()
     assert ctr.value == 0
 
+    from threading import Event
+
+    rising_edge = Event()
+    falling_edge = Event()
+
     def count_func(ctr: AtomicCounter):
+        rising_edge.wait()
         for i in range(10):
-            sleep(0.001)
             ctr.inc()
+        falling_edge.wait()
         for i in range(10):
-            sleep(0.001)
             ctr.dec()
 
     ctr = AtomicCounter()
 
     t1 = Thread(target=count_func, daemon=True, args=[ctr])
-    t2 = Thread(target=count_func, daemon=True, args=[ctr])
-
     t1.start()
-    t2.start()
 
-    assert ctr.wait_above(1) is True
+    rising_edge.set()
+
+    assert ctr.wait_above(0) is True
+    assert ctr.wait_above(5) is True
+    assert ctr.wait_equal(10) is True
+    assert ctr.wait_below(11) is True
+
+    falling_edge.set()
+
+    assert ctr.wait_below(10) is True
     assert ctr.wait_below(2) is True
     assert ctr.wait_equal(0) is True
-
     assert ctr.value == 0
 
     ctr = AtomicCounter(1)
@@ -64,9 +74,9 @@ def test_atomic_counter_basics():
 def test_atomic_counter_wait_timeout():
     ctr = AtomicCounter()
 
-    assert ctr.wait_above(0, timeout=0.01) is False
-    assert ctr.wait_below(-1, timeout=0.01) is False
-    assert ctr.wait_equal(1, timeout=0.01) is False
+    assert ctr.wait_above(0, timeout=0.0001) is False
+    assert ctr.wait_below(-1, timeout=0.0001) is False
+    assert ctr.wait_equal(1, timeout=0.0001) is False
 
     assert ctr.wait_equal(0) is True
     assert ctr.wait_below(1) is True
@@ -98,15 +108,15 @@ def test_atomic_counter_lock():
 
     def concurrent(c: AtomicCounter):
         while c.value < 1:
-            if not c._lock.acquire(blocking=False):
+            if not c._ao._condition.acquire(blocking=False):
                 c.inc()
             else:
-                c._lock.release()
+                c._ao._condition.release()
 
     def concurrent_with_context(c: AtomicCounter):
         while c.value < 1:
             with c:
-                sleep(0.0001)
+                pass
 
     t1 = Thread(target=concurrent, args=[ctr])
     t1.start()
