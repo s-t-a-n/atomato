@@ -14,6 +14,34 @@ StateType = Union[int, SupportsInt]
 class AtomicState:
     """AtomicState allows to store a state in a threadsafe way."""
 
+    class AtomicStateTracker:
+        """Encapsulation class for AtomicState that only allows tracking of state."""
+
+        _state: "AtomicState"
+
+        def __init__(self, atomic_state: "AtomicState"):
+            """Construct an `AtomicStateTracker`.
+
+            Args:
+                atomic_state: `AtomicState` that the AtomicStateTracker will track.
+            """
+            self._state = atomic_state
+
+        @property
+        def state(self) -> StateType:
+            """Return state of AtomicStateTracker.
+
+            Returns:
+                StateType: Return state.
+            """
+            return self._state.state
+
+        def __str__(self) -> str:
+            return str(self.state)
+
+        def __repr__(self) -> str:
+            return f"AtomicStateTracker({str(self)})"
+
     _state: AtomicInteger
     _StateType: Type[StateType]
 
@@ -67,7 +95,7 @@ class AtomicState:
         Returns:
             AtomicStateTracker: Return `StateTracker`.
         """
-        return AtomicStateTracker(self)
+        return self.AtomicStateTracker(self)
 
     def __eq__(self, other: object) -> bool:
         if not hasattr(other, "__int__"):
@@ -85,32 +113,3 @@ class AtomicState:
 
     def __repr__(self) -> str:
         return f"AtomicState({str(self)})"
-
-
-class AtomicStateTracker:
-    """Encapsulation class for AtomicState that allows only tracking the state (disallowing setting it)."""
-
-    _state: AtomicState
-
-    def __init__(self, atomic_state: AtomicState):
-        """Construct an `AtomicStateTracker`.
-
-        Args:
-            atomic_state: `AtomicState` that the AtomicStateTracker will track.
-        """
-        self._state = atomic_state
-
-    @property
-    def state(self) -> StateType:
-        """Return state of AtomicStateTracker.
-
-        Returns:
-            StateType: Return state.
-        """
-        return self._state.state
-
-    def __str__(self) -> str:
-        return str(self.state)
-
-    def __repr__(self) -> str:
-        return f"AtomicStateTracker({str(self)})"
