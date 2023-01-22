@@ -1,44 +1,55 @@
 from functools import total_ordering
+from inspect import isclass
 from threading import Condition
+from typing import Any
 from typing import Callable
+from typing import Dict
 from typing import Generic
+from typing import List
 from typing import Optional
+from typing import Type
 from typing import TypeVar
+from typing import Union
 
 
 T = TypeVar("T")
 
 
 @total_ordering
-class AtomicVariable(Generic[T]):
-    """AtomicVariable allows to synchronize access for an underlying variable."""
+class AtomicObject(Generic[T]):
+    """AtomicObject allows to synchronize access for an underlying variable."""
 
     _condition: Condition
-    _value: T
+    _object: T
 
-    def __init__(self, instance: T):
-        """Construct an `AtomicVariable` for `instance`.
+    def __init__(
+        self, obj: Union[T, Type[T]], *args: List[Any], **kwargs: Dict[str, Any]
+    ):
+        """Construct an `AtomicObject` for `instance` by inline creating .
+
+        Example:
+            AtomicObject(MyClass(foo="a bit bar, but not too much"))
 
         Args:
-            instance: instance that will be encapsulated in `AtomicVariable`.
+            obj: instance that will be encapsulated in `AtomicObject`.
         """
         self._condition = Condition()
-        self._value = instance
+        self._object = obj(*args, **kwargs) if isclass(obj) else obj
 
     @property
     def value(self) -> T:
-        """Return value of AtomicVariable.
+        """Return value of AtomicObject.
 
         Returns:
-            T: value of AtomicVariable
+            T: value of AtomicObject
         """
         with self._condition:
-            return self._value
+            return self._object
 
     def wait_for(
         self, predicate: Callable[[T], bool], timeout: Optional[float] = None
     ) -> bool:
-        """Wait for a value of an AtomicVariable by passing a `predicate`.
+        """Wait for a value of an AtomicObject by passing a `predicate`.
 
         Args:
             predicate: Function or lambda that takes a `T` and returns True if the predicate holds true.
@@ -55,7 +66,7 @@ class AtomicVariable(Generic[T]):
                     return self._v
 
 
-            a = AtomicVariable(MyClass())
+            a = AtomicObject(MyClass())
             vb = a.wait_for(lambda mc: mc.value == 0)
             assert vb is True
 
@@ -64,17 +75,17 @@ class AtomicVariable(Generic[T]):
         """
         with self._condition:
             return self._condition.wait_for(
-                predicate=lambda: predicate(self._value), timeout=timeout
+                predicate=lambda: predicate(self._object), timeout=timeout
             )
 
     def set_by(self, setter: Callable[[T], None]) -> T:
-        """Set value of AtomicVariable by using a passed function.
+        """Set value of AtomicObject by using a passed function.
 
         Args:
             setter: Function or lambda that takes a `T` and uses its members to set a value.
 
         Returns:
-            T: Value of AtomicVariable after setting it.
+            T: Value of AtomicObject after setting it.
 
         Example:
             class MyClass:
@@ -82,26 +93,26 @@ class AtomicVariable(Generic[T]):
                 def set(self, v):
                     self._v = v
 
-            a = AtomicVariable(int(0))
+            a = AtomicObject(int(0))
             v = a.set_by(lambda mc: mc.set(1))
             assert v == 1
         """
         with self._condition:
-            setter(self._value)
+            setter(self._object)
             self._condition.notify_all()
             return self.value
 
     def set(self, value: T) -> T:
-        """Set value of AtomicVariable.
+        """Set value of AtomicObject.
 
         Args:
             value: Value that the AtomicInteger will be set to.
 
         Returns:
-            T: Value of AtomicVariable after setting it.
+            T: Value of AtomicObject after setting it.
         """
         with self._condition:
-            self._value = value
+            self._object = value
             self._condition.notify_all()
             return self.value
 
@@ -124,4 +135,4 @@ class AtomicVariable(Generic[T]):
         return f"{self.value}"
 
     def __repr__(self) -> str:
-        return f"AtomicVariable({str(self)})"
+        return f"AtomicObject({str(self)})"
