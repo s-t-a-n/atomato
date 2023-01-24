@@ -5,7 +5,7 @@ from .atomic_counter import AtomicCounter
 
 
 class AtomicInteger(AtomicCounter):
-    """AtomicState allows to store an integer in a threadsafe way."""
+    """AtomicInteger allows to store an integer in a threadsafe way."""
 
     def __init__(self, default_value: Union[int, SupportsInt] = 0):
         """Construct an `AtomicInteger`.
@@ -13,7 +13,7 @@ class AtomicInteger(AtomicCounter):
         Args:
             default_value: Default value that the AtomicInteger will be set to.
         """
-        super().__init__(default_value, allow_below_default=True)
+        super().__init__(int(default_value), allow_below_default=True)
 
     def set(self, d: Union[int, SupportsInt] = 0) -> int:
         """Set AtomicInteger to `d`.
@@ -24,7 +24,7 @@ class AtomicInteger(AtomicCounter):
         Returns:
             int: Return new value.
         """
-        return self._set(d=d)
+        return int(self._set(d=int(d)))
 
     def __str__(self) -> str:
         return f"{self.value}"
