@@ -1,36 +1,45 @@
+# class AtomicCounter:
+#     pass
+
 from functools import total_ordering
 
 # from typing import Generic
 # from typing import TypeVar
 from typing import Callable
 from typing import Dict
+from typing import Generic
 from typing import Optional
+from typing import Protocol
 from typing import SupportsFloat
 from typing import SupportsInt
 from typing import Type
 from typing import TypeAlias
+from typing import TypeVar
 from typing import Union
 
-from .atomic_object import AtomicObject
+from .atomic_number import AtomicNumber
+from .protocols import ComparableNumber
+from .protocols import Number
+from .protocols import SupportComparison
+from .protocols import SupportsComparableNumbers
 
 
-# T =  IntOrFloat
-# IntOrFloat: TypeAlias = IntOrFloat
-IntOrFloat: TypeAlias = Union[int, SupportsInt, float, SupportsFloat]
+# T = TypeVar("T", int, SupportsInt, float, SupportsFloat, SupportsOrdering)
 
 
-@total_ordering
-class AtomicCounter(SupportsInt, SupportsFloat):
+T = TypeVar("T", bound=Number)
+
+
+class AtomicCounter(Generic[T]):
     """AtomicCounter allows to count up and down in a threadsafe way."""
 
-    _type: Type[IntOrFloat]
-    _ao: AtomicObject[IntOrFloat]
-    _default_value: IntOrFloat
+    _an: AtomicNumber[T]
+    _default_value: T
     _allow_below_default: bool
 
     def __init__(
         self,
-        default_value: int | float = 0,
+        default_value: T = 0,  # type: ignore
         allow_below_default: bool = True,
     ):
         """Construct an `AtomicCounter`.
@@ -40,36 +49,34 @@ class AtomicCounter(SupportsInt, SupportsFloat):
             allow_below_default: If True allow decreasing the value below the default.
                                  If False, the lowest value will always be the default value.
         """
-        self._type = type(default_value)
-        self._ao = AtomicObject(self._type(default_value))
+        # self._type = type(default_value)
+        self._an = AtomicNumber(default_value)
         self._default_value = default_value
         self._allow_below_default = allow_below_default
 
-    def _wait(self, predicate: str, d: IntOrFloat, timeout: Optional[float]) -> bool:
-        m: Dict[str, Callable[[IntOrFloat, IntOrFloat], bool]] = {
-            "==": lambda x, y: x == y,
-            ">": lambda x, y: x > y,
-            "<": lambda x, y: x < y,
-            ">=": lambda x, y: x >= y,
-            "<=": lambda x, y: x <= y,
+    def _wait(self, predicate: str, d: Number, timeout: Optional[float]) -> bool:
+        m: Dict[str, Callable[[Number, Number], bool]] = {
+            "==": lambda x, y: bool(x == y),
+            ">": lambda x, y: bool(x > y),
+            "<": lambda x, y: bool(x < y),
+            ">=": lambda x, y: bool(x >= y),
+            "<=": lambda x, y: bool(x <= y),
         }
         assert predicate in m.keys(), f"predicate {predicate} not found in {m.keys()}"
-
-        return self._ao.wait_for(
-            predicate=lambda v: m[predicate](v, self._type(d)), timeout=timeout
+        return bool(
+            self._an.wait_for(predicate=lambda v: m[predicate](v, d), timeout=timeout)
         )
 
-    def _set(self, d: IntOrFloat = 1) -> IntOrFloat:
-        with self._ao:
-            v = (
-                self._type(d)
-                if self._allow_below_default or self._type(d) >= self._default_value
+    def _set(self, d: Number) -> Number:
+        with self._an:
+            v: Number = (
+                d
+                if self._allow_below_default or d >= self._default_value
                 else self._default_value
             )
-            self._ao.set(v)
-            return v
+            return self._an.set(v)
 
-    def inc(self, d: IntOrFloat = 1) -> IntOrFloat:
+    def inc(self, d: Number = 1) -> Number:
         """Increase value of AtomicCounter by `d`.
 
         Args:
@@ -78,9 +85,9 @@ class AtomicCounter(SupportsInt, SupportsFloat):
         Returns:
             int: value after increasing by `d`
         """
-        return self._set(self.value + self._type(d))
+        return self._set(self.value + d)
 
-    def dec(self, d: IntOrFloat = 1) -> IntOrFloat:
+    def dec(self, d: Number = 1) -> Number:
         """Decrease value of AtomicCounter by `d`.
 
         Args:
@@ -89,9 +96,9 @@ class AtomicCounter(SupportsInt, SupportsFloat):
         Returns:
             int: value after decreasing by `d`
         """
-        return self._set(self.value - self._type(d))
+        return self._set(self.value - d)
 
-    def reset(self) -> IntOrFloat:
+    def reset(self) -> Number:
         """Reset value of AtomicCounter to `default_value` (0 if not specified to constructor).
 
         Returns:
@@ -100,15 +107,15 @@ class AtomicCounter(SupportsInt, SupportsFloat):
         return self._set(self._default_value)
 
     @property
-    def value(self) -> IntOrFloat:
+    def value(self) -> Number:
         """Return value of AtomicCounter.
 
         Returns:
             int: value of AtomicCounter
         """
-        return self._ao.value
+        return self._an.value
 
-    def wait_equal(self, d: IntOrFloat, timeout: Optional[float] = None) -> bool:
+    def wait_equal(self, d: Number, timeout: Optional[float] = None) -> bool:
         """Wait until AtomicCounter has a value of `d` or if `timeout` expired.
 
         Args:
@@ -121,7 +128,7 @@ class AtomicCounter(SupportsInt, SupportsFloat):
         """
         return self._wait(d=d, predicate="==", timeout=timeout)
 
-    def wait_below(self, d: IntOrFloat, timeout: Optional[float] = None) -> bool:
+    def wait_below(self, d: Number, timeout: Optional[float] = None) -> bool:
         """Wait until AtomicCounter has a value lower than `d` or if `timeout` expired.
 
         Args:
@@ -134,7 +141,7 @@ class AtomicCounter(SupportsInt, SupportsFloat):
         """
         return self._wait(d=d, predicate="<", timeout=timeout)
 
-    def wait_above(self, d: IntOrFloat, timeout: Optional[float] = None) -> bool:
+    def wait_above(self, d: Number, timeout: Optional[float] = None) -> bool:
         """Wait until AtomicCounter has a value higher than `d` or if `timeout` expired.
 
         Args:
@@ -150,10 +157,16 @@ class AtomicCounter(SupportsInt, SupportsFloat):
     def __eq__(self, other: object) -> bool:
         if not hasattr(other, "__int__"):
             return NotImplemented
-        return self.value == self._type(other)  # type: ignore
+        return bool(self.value == other)
 
-    def __lt__(self, other: IntOrFloat) -> bool:
-        return self._type(self.value) < self._type(other)
+    def __lt__(self, other: Number) -> bool:
+        return bool(self.value < other)
+
+    def __ge__(self, other: Number) -> bool:
+        return bool(self.value >= other)
+
+    def __le__(self, other: Number) -> bool:
+        return bool(self.value <= other)
 
     def __int__(self) -> int:
         return int(self.value)
@@ -162,13 +175,29 @@ class AtomicCounter(SupportsInt, SupportsFloat):
         return float(self.value)
 
     def __enter__(self) -> None:
-        self._ao._condition.acquire()
+        self._an._condition.acquire()
 
     def __exit__(self, etype, value, traceback) -> None:  # type: ignore
-        self._ao._condition.release()
+        self._an._condition.release()
 
     def __str__(self) -> str:
         return f"{self.value}"
 
     def __repr__(self) -> str:
         return f"AtomicCounter({str(self)})"
+
+
+# a = AtomicCounter(default_value=2)
+# a.inc()
+# assert a == 3
+
+
+a: Number = 5.0
+b: Number = 6
+assert a < b
+
+c: Number = 5
+d: Number = 6
+assert c - d
+
+assert a < b

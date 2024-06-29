@@ -6,6 +6,7 @@ from typing import Callable
 from typing import Dict
 from typing import Generic
 from typing import Optional
+from typing import Protocol
 from typing import Tuple
 from typing import Type
 from typing import TypeVar
@@ -15,7 +16,7 @@ from typing import Union
 T = TypeVar("T")
 
 
-@total_ordering
+# @total_ordering
 class AtomicObject(Generic[T]):
     """AtomicObject allows to synchronize access for an underlying variable."""
 
@@ -84,8 +85,10 @@ class AtomicObject(Generic[T]):
             assert vb is False
         """
         with self._condition:
-            return self._condition.wait_for(
-                predicate=lambda: predicate(self._object), timeout=timeout
+            return bool(
+                self._condition.wait_for(
+                    predicate=lambda: predicate(self._object), timeout=timeout
+                )
             )
 
     def set_by(self, setter: Callable[[T], None]) -> T:
@@ -127,14 +130,14 @@ class AtomicObject(Generic[T]):
             self._condition.notify_all()
             return self.value
 
-    def __eq__(self, other: object) -> bool:
-        return self.value == other
-
-    def __lt__(self, other: T) -> bool:
-        return self.value < other  # type: ignore
-
-    def __int__(self) -> int:
-        return int(self.value)  # type: ignore
+    # def __eq__(self, other: object) -> bool:
+    #     return self.value == other
+    #
+    # def __lt__(self, other: T) -> bool:
+    #     return self.value < other  # type: ignore
+    #
+    # def __int__(self) -> int:
+    #     return int(self.value)  # type: ignore
 
     def __enter__(self) -> None:
         self._condition.acquire()
@@ -147,3 +150,76 @@ class AtomicObject(Generic[T]):
 
     def __repr__(self) -> str:
         return f"AtomicObject({str(self)})"
+
+
+# from typing import SupportsInt
+# from typing import SupportsFloat
+#
+# T = TypeVar('T', bound=SupportsFloat)
+#
+#
+# class AtomicNumber(AtomicObject[T], SupportsInt, SupportsFloat):
+#     def __int__(self) -> int:
+#         return 0
+#
+#     def __float__(self) -> float:
+#         return 0.0
+#
+#     def __repr__(self) -> str:
+#         return f"AtomicNumber({str(self.value)})"
+
+
+# class AtomicNumber(AtomicObject[T], SupportsFloat, SupportsInt):
+#     """AtomicNumber allows to store a number in a threadsafe way."""
+#
+#     # def __init__(self, value: T = 0.0):
+#     #     """Construct an `AtomicNumber`.
+#     #
+#     #     Args:
+#     #         value: Default value that the AtomicNumber will be set to.
+#     #     """
+#     #     super().__init__(value)
+#
+#     # def set(self, d: Union[AnyNumber, AnySupportableNumber] = 0) -> AnyNumber:
+#     #     """Set AtomicNumber to `d`.
+#     #
+#     #     Args:
+#     #         d: Value that the AtomicNumber will be set to (should support conversion to `int`)
+#     #
+#     #     Returns:
+#     #         int: Return new value.
+#     #     """
+#     #     return super().set(d=d)
+#
+#     # def __str__(self) -> str:
+#     #     return f"{self.value}"
+#
+#     def __float__(self) -> float:
+#         return float(self.value)
+#
+#     def __int__(self) -> int:
+#         return int(self.value)
+#
+#     def __repr__(self) -> str:
+#         return f"AtomicNumber({str(self.value)})"
+
+
+# class MyInt(SupportsInt, SupportsFloat):
+#
+#     def __init__(self) -> None:
+#         pass
+#
+#     def __float__(self) -> float:
+#         return 5
+#
+#     def __int__(self) -> int:
+#         return 5
+#
+#
+# f = MyInt()
+#
+# a = AtomicNumber(2)
+# b = AtomicNumber(2.5)
+# c = AtomicNumber(int())
+# d = AtomicNumber(MyInt())
+#
